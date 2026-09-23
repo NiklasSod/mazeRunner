@@ -315,10 +315,24 @@ function playerCollision(a, b, room) {
   const d = Math.hypot(dx, dy);
   const minDist = PLAYER_R * 2;
   if (d < minDist && d > 0.0001) {
-    const overlap = (minDist - d) / 2;
     const nx = dx / d, ny = dy / d;
-    a.x -= nx * overlap; a.y -= ny * overlap;
-    b.x += nx * overlap; b.y += ny * overlap;
+    const overlap = minDist - d;
+
+    // Separate along the collision axis, but never push a player into a wall.
+    const aTarget = { x: a.x - nx * overlap, y: a.y - ny * overlap };
+    const bTarget = { x: b.x + nx * overlap, y: b.y + ny * overlap };
+    const aCan = !boxCollides(aTarget.x, aTarget.y, PLAYER_R);
+    const bCan = !boxCollides(bTarget.x, bTarget.y, PLAYER_R);
+
+    if (aCan && bCan) {
+      a.x = a.x - nx * overlap / 2; a.y = a.y - ny * overlap / 2;
+      b.x = b.x + nx * overlap / 2; b.y = b.y + ny * overlap / 2;
+    } else if (aCan) {
+      a.x = aTarget.x; a.y = aTarget.y;
+    } else if (bCan) {
+      b.x = bTarget.x; b.y = bTarget.y;
+    }
+    // else: both are pinned against walls — leave them (rare dead-end squeeze)
   }
   // contact key steal
   if (d < minDist + 2 && room.now >= room.stealCooldownUntil) {
