@@ -334,6 +334,16 @@
   });
 
   // ---- actions ----
+  function tryFullscreen() {
+    const el = document.documentElement;
+    try {
+      let p = null;
+      if (el.requestFullscreen) p = el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      if (p && p.catch) p.catch(() => {});
+    } catch (err) { /* not supported, ignore */ }
+  }
+
   function playAgain() {
     myId = null;
     state = null;
@@ -346,6 +356,7 @@
   playBtn.addEventListener('click', () => {
     myName = nameInput.value.trim() || 'Spelare';
     showGame();
+    tryFullscreen();
     showOverlay('Söker motståndare…', 'Du hamnar i kö för nästa match.');
     ensureSocket().emit('join', { name: myName });
   });

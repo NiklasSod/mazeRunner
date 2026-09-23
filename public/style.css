@@ -110,6 +110,7 @@ button:active { transform: scale(0.97); }
 #stage {
   position: relative;
   width: min(100vw, 177.78vh);
+  width: min(100vw, calc(100dvh * 16 / 9));
   aspect-ratio: 16 / 9;
   touch-action: none;
 }
@@ -129,13 +130,13 @@ button:active { transform: scale(0.97); }
 /* HUD */
 #hud {
   position: absolute;
-  top: 0.7rem;
+  top: max(0.7rem, env(safe-area-inset-top));
   left: 0;
   right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem;
+  padding: 0 max(1rem, env(safe-area-inset-left)) 0 max(1rem, env(safe-area-inset-right));
   pointer-events: none;
   z-index: 2;
 }
@@ -176,7 +177,7 @@ button:active { transform: scale(0.97); }
 /* Inventory */
 #inventory {
   position: absolute;
-  bottom: 0.8rem;
+  bottom: max(0.8rem, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
