@@ -21,11 +21,12 @@ const WIDTH = Maze.WIDTH;
 const HEIGHT = Maze.HEIGHT;
 
 // --- tuning ---
-const MATCH_TIME = 180;             // seconds
+const MATCH_TIME = 300;             // seconds
 const HELP_TIME = 30;               // show guide arrows in the last N seconds + overtime
 const BASE_SPEED = 140;             // px / s
 const SPEED_BOOST = 1.6;
 const PLAYER_R = 12;                // collision radius (px)
+const CORNER_ASSIST = 4;            // px sideways nudge to clear a tiny wall corner (~15% of a 24px body)
 const STEAL_COOLDOWN = 1500;        // ms before another contact steal is allowed
 const COIN_RESPAWN = 20000;         // ms
 const POWER_RESPAWN = 12000;        // ms
@@ -285,6 +286,26 @@ function update(room, now) {
   }
 }
 
+function moveAxis(p, axis, delta) {
+  // Move along one axis; if a small corner clips a wall, nudge the player
+  // sideways a little so they slip into the corridor instead of getting stuck.
+  if (axis === 'x') p.x += delta; else p.y += delta;
+  if (!boxCollides(p.x, p.y, PLAYER_R)) return;
+
+  const perp = axis === 'x' ? 'y' : 'x';
+  const orig = p[perp];
+  for (const dir of [1, -1]) {
+    for (let n = 1; n <= CORNER_ASSIST; n++) {
+      p[perp] = orig + dir * n;
+      if (!boxCollides(p.x, p.y, PLAYER_R)) return;
+    }
+    p[perp] = orig;
+  }
+
+  // couldn't clear the corner — undo the move on this axis
+  if (axis === 'x') p.x -= delta; else p.y -= delta;
+}
+
 function movePlayer(p, room) {
   if (room.now < p.frozenUntil) return;
 
@@ -300,11 +321,8 @@ function movePlayer(p, room) {
 
   p.facing = Math.atan2(ny, nx);
 
-  p.x += nx * step;
-  if (boxCollides(p.x, p.y, PLAYER_R)) p.x -= nx * step;
-
-  p.y += ny * step;
-  if (boxCollides(p.x, p.y, PLAYER_R)) p.y -= ny * step;
+  moveAxis(p, 'x', nx * step);
+  moveAxis(p, 'y', ny * step);
 
   p.x = Math.max(PLAYER_R, Math.min(WIDTH - PLAYER_R, p.x));
   p.y = Math.max(PLAYER_R, Math.min(HEIGHT - PLAYER_R, p.y));
