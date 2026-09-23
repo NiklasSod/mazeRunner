@@ -34,7 +34,7 @@ const FREEZE_DURATION = 3000;
 const REVERSE_DURATION = 5000;
 const COIN_SCORE = 10;
 const TIME_BONUS_RATE = 2;          // points per remaining second
-const INVENTORY_SIZE = 2;
+const INVENTORY_SIZE = 1;           // one power-up slot; the key is a separate, always-available carry
 
 const POWER_TYPES = ['speed', 'freeze', 'steal', 'reverse'];
 const PLAYER_COLORS = ['#4fc3f7', '#ffb74d'];

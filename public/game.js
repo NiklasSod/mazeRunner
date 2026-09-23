@@ -199,7 +199,7 @@
 
   function renderInventory(me) {
     inventory.innerHTML = '';
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 1; i++) {
       const slot = document.createElement('div');
       slot.className = 'slot' + (me.inv[i] ? '' : ' empty');
       const type = me.inv[i];
@@ -211,7 +211,7 @@
       } else {
         slot.textContent = '·';
       }
-      slot.innerHTML += '<div class="key-hint">[' + (i === 0 ? 'Q' : 'E') + ']</div>';
+      slot.innerHTML += '<div class="key-hint">[Q]</div>';
       inventory.appendChild(slot);
     }
   }
@@ -247,7 +247,6 @@
     if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault();
     keys[k] = true;
     if (k === 'q' || k === '1') usePower(0);
-    if (k === 'e' || k === '2') usePower(1);
     if (k === 'enter' && overlay.classList.contains('hidden') === false && state && state.phase === 'ended') playAgain();
   });
 
