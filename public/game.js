@@ -45,6 +45,17 @@
   let camX = 0, camY = 0, scale = 2;
   let time = 0;
 
+  // ---- touch / virtual joystick -------
+  let touchId = null;        // active touch identifier
+  let touchActive = false;   // joystick engaged (dragged past deadzone)
+  let touchStartCX = 0, touchStartCY = 0;
+  let touchCurCX = 0, touchCurCY = 0;
+  let touchDir = { dx: 0, dy: 0 };
+  let touchStartTime = 0;
+  const TAP_MAX_MOVE = 12;   // px (canvas space) before a touch counts as a drag
+  const TAP_MAX_MS = 350;    // ms before it's no longer a tap
+  const JOY_DEADZONE = 10;   // px (canvas space) before movement engages
+
   // ---- helpers ----
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
@@ -217,7 +228,16 @@
   }
 
   // ---- input ----
+  function dirFromVector(dx, dy) {
+    if (Math.hypot(dx, dy) < 1) return { dx: 0, dy: 0 };
+    const oct = Math.round(Math.atan2(dy, dx) / (Math.PI / 4));
+    const dirs = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+    const d = dirs[((oct % 8) + 8) % 8];
+    return { dx: d[0], dy: d[1] };
+  }
+
   function currentInput() {
+    if (touchActive) return { dx: touchDir.dx, dy: touchDir.dy };
     let dx = 0, dy = 0;
     if (keys['a'] || keys['arrowleft']) dx -= 1;
     if (keys['d'] || keys['arrowright']) dx += 1;
@@ -241,6 +261,65 @@
     const me = state.players.find((p) => p.id === myId);
     if (me && me.inv[slot]) socket.emit('usePower', slot);
   }
+
+  // ---- touch / virtual joystick -------
+  function canvasPoint(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height)
+    };
+  }
+
+  function onTouchStart(e) {
+    if (touchId !== null) return; // already tracking one finger
+    const t = e.changedTouches[0];
+    touchId = t.identifier;
+    touchActive = false;
+    const p = canvasPoint(t.clientX, t.clientY);
+    touchStartCX = p.x; touchStartCY = p.y;
+    touchCurCX = p.x; touchCurCY = p.y;
+    touchStartTime = Date.now();
+    touchDir = { dx: 0, dy: 0 };
+    e.preventDefault();
+  }
+
+  function onTouchMove(e) {
+    if (touchId === null) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier !== touchId) continue;
+      const p = canvasPoint(t.clientX, t.clientY);
+      touchCurCX = p.x; touchCurCY = p.y;
+      const dx = touchCurCX - touchStartCX, dy = touchCurCY - touchStartCY;
+      const d = Math.hypot(dx, dy);
+      if (!touchActive && d > JOY_DEADZONE) touchActive = true;
+      if (touchActive) touchDir = dirFromVector(dx, dy);
+      e.preventDefault();
+      return;
+    }
+  }
+
+  function onTouchEnd(e) {
+    if (touchId === null) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier !== touchId) continue;
+      const dx = touchCurCX - touchStartCX, dy = touchCurCY - touchStartCY;
+      const moved = Math.hypot(dx, dy);
+      const dur = Date.now() - touchStartTime;
+      if (!touchActive && moved < TAP_MAX_MOVE && dur < TAP_MAX_MS) {
+        usePower(0); // tap anywhere activates the power-up
+      }
+      touchId = null;
+      touchActive = false;
+      touchDir = { dx: 0, dy: 0 };
+      return;
+    }
+  }
+
+  canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+  canvas.addEventListener('touchend', onTouchEnd, { passive: false });
+  canvas.addEventListener('touchcancel', onTouchEnd, { passive: false });
 
   window.addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase();
@@ -544,6 +623,28 @@
       if (keyTarget) drawEdgeArrow(me.x, me.y, keyTarget.x, keyTarget.y, '#ffd54f', 'K');
       drawEdgeArrow(me.x, me.y, state.exit.x, state.exit.y, '#66bb6a', 'E');
     }
+
+    drawJoystick();
+  }
+
+  function drawJoystick() {
+    if (touchId === null) return;
+    const baseR = 46;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(touchStartCX, touchStartCY, baseR, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    let kx = touchCurCX - touchStartCX, ky = touchCurCY - touchStartCY;
+    const kd = Math.hypot(kx, ky);
+    const maxR = baseR * 0.6;
+    if (kd > maxR) { kx = kx / kd * maxR; ky = ky / kd * maxR; }
+    ctx.beginPath();
+    ctx.arc(touchStartCX + kx, touchStartCY + ky, 18, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fill();
+    ctx.restore();
   }
 
   function loop() {
