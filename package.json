@@ -1,0 +1,16 @@
+{
+  "name": "mazerunner",
+  "version": "1.0.0",
+  "description": "Top-down 2D maze game, 1v1 web multiplayer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

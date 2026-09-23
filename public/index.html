@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maze Runner</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- Menu -->
+  <div id="menu" class="screen">
+    <div class="menu-box">
+      <h1>MAZE RUNNER</h1>
+      <p class="tagline">1 mot 1 · Hitta nyckeln · Ta dig ut först</p>
+      <div class="join-row">
+        <input id="nameInput" maxlength="12" placeholder="Ditt namn" autocomplete="off" />
+        <button id="playBtn">Spela</button>
+      </div>
+      <div id="recent">
+        <h2>Senaste matcher</h2>
+        <ul id="recentList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game -->
+  <div id="game" class="screen hidden">
+    <div id="hud">
+      <div class="hud-side" id="meBox">
+        <span class="dot" id="meDot"></span>
+        <span class="pname" id="meName">—</span>
+        <span class="key-badge hidden" id="meKey">🔑</span>
+        <span class="score" id="meScore">0</span>
+      </div>
+      <div id="timer">3:00</div>
+      <div class="hud-side right" id="oppBox">
+        <span class="score" id="oppScore">0</span>
+        <span class="key-badge hidden" id="oppKey">🔑</span>
+        <span class="pname" id="oppName">—</span>
+        <span class="dot" id="oppDot"></span>
+      </div>
+    </div>
+
+    <div id="stage">
+      <canvas id="canvas" width="1280" height="720"></canvas>
+      <div id="toast"></div>
+    </div>
+
+    <div id="inventory" class="hidden"></div>
+
+    <div id="overlay">
+      <div id="overlayText"></div>
+      <div id="overlaySub"></div>
+      <button id="againBtn" class="hidden">Spela igen</button>
+      <button id="menuBtn" class="hidden">Tillbaka till meny</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/maze.js"></script>
+  <script src="/game.js"></script>
+</body>
+</html>
