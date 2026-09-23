@@ -187,8 +187,8 @@ button:active { transform: scale(0.97); }
 }
 
 .slot {
-  width: 58px;
-  height: 58px;
+  width: 116px;
+  height: 116px;
   border-radius: 12px;
   background: rgba(10, 14, 26, 0.8);
   border: 2px solid #2b3554;
@@ -204,14 +204,14 @@ button:active { transform: scale(0.97); }
 .slot .key-hint {
   position: absolute;
   bottom: 3px;
-  font-size: 0.6rem;
+  font-size: 1.2rem;
   color: var(--muted);
   letter-spacing: 0.05em;
 }
 
 .slot.empty { opacity: 0.35; border-style: dashed; }
 
-.slot .lbl { font-size: 0.55rem; margin-top: 2px; }
+.slot .lbl { font-size: 1.1rem; margin-top: 2px; }
 
 /* Toast */
 #toast {

@@ -222,7 +222,7 @@
       } else {
         slot.textContent = '·';
       }
-      slot.innerHTML += '<div class="key-hint">[Q]</div>';
+      slot.innerHTML += '<div class="key-hint"></div>';
       inventory.appendChild(slot);
     }
   }
